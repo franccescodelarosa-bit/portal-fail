@@ -3,172 +3,195 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Portal Dimensional Webcam</title>
-
-  <!-- AFRAME -->
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <title>HIDE MODE</title>
 
   <style>
-    body{
+
+    *{
       margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
       overflow:hidden;
       background:black;
       font-family:Arial, sans-serif;
     }
 
-    .hint{
-      position:absolute;
-      top:20px;
+    /* VIDEO FONDO */
+
+    #webcam{
+      position:fixed;
+      inset:0;
       width:100%;
-      text-align:center;
-      z-index:999;
-      color:white;
-      font-size:18px;
-      letter-spacing:2px;
-      text-shadow:0 0 15px cyan;
-      animation: glow 1.5s infinite alternate;
+      height:100%;
+      object-fit:cover;
+      z-index:1;
+      transform: scaleX(-1);
     }
 
-    @keyframes glow{
+    /* CAPA OSCURA */
+
+    #darkness{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0);
+      transition:1s;
+      z-index:2;
+      pointer-events:none;
+      backdrop-filter: blur(0px);
+    }
+
+    #darkness.active{
+      background:rgba(0,0,0,0.88);
+      backdrop-filter: blur(4px);
+    }
+
+    /* ESTRELLAS */
+
+    #stars{
+      position:fixed;
+      inset:0;
+      z-index:3;
+      pointer-events:none;
+      opacity:0;
+      transition:1s;
+    }
+
+    #stars.active{
+      opacity:1;
+    }
+
+    .star{
+      position:absolute;
+      width:2px;
+      height:2px;
+      background:white;
+      border-radius:50%;
+      animation: float 4s infinite alternate;
+    }
+
+    @keyframes float{
       from{
-        opacity:.5;
+        transform:translateY(0px);
+        opacity:0.3;
       }
+
       to{
+        transform:translateY(-20px);
         opacity:1;
       }
     }
+
+    /* BOTON */
+
+    #hideBtn{
+      position:fixed;
+      top:30px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:999;
+
+      padding:16px 40px;
+
+      border:none;
+      border-radius:50px;
+
+      background:rgba(0,0,0,0.5);
+
+      color:#00ffff;
+
+      font-size:20px;
+      letter-spacing:4px;
+
+      cursor:pointer;
+
+      backdrop-filter: blur(10px);
+
+      transition:0.4s;
+
+      box-shadow:
+        0 0 10px #00ffff,
+        0 0 30px #00ffff;
+    }
+
+    #hideBtn:hover{
+
+      transform:
+        translateX(-50%)
+        scale(1.08);
+
+      box-shadow:
+        0 0 20px #00ffff,
+        0 0 60px #00ffff;
+    }
+
+    /* TEXTO */
+
+    #message{
+
+      position:fixed;
+
+      bottom:60px;
+      width:100%;
+
+      text-align:center;
+
+      z-index:10;
+
+      color:white;
+
+      font-size:40px;
+
+      letter-spacing:8px;
+
+      opacity:0;
+
+      transition:1s;
+
+      text-shadow:
+        0 0 20px #00ffff,
+        0 0 50px #00ffff;
+    }
+
+    #message.active{
+      opacity:1;
+    }
+
   </style>
 </head>
 
 <body>
 
-<div class="hint">
-  PERMITE LA WEBCAM Y HAZ CLICK EN EL PORTAL
-</div>
+<!-- WEBCAM -->
 
-<!-- VIDEO REAL -->
 <video
   id="webcam"
   autoplay
-  playsinline
   muted
-  style="display:none;">
+  playsinline>
 </video>
 
-<a-scene fog="type: exponential; color: #000; density: 0.03">
+<!-- OSCURIDAD -->
 
-  <!-- SKY -->
-  <a-sky
-    id="sky"
-    color="#050510">
-  </a-sky>
+<div id="darkness"></div>
 
-  <!-- LUCES -->
-  <a-light
-    type="ambient"
-    intensity="0.7">
-  </a-light>
+<!-- ESTRELLAS -->
 
-  <a-light
-    type="point"
-    color="#00ffff"
-    intensity="2"
-    position="0 5 5">
-  </a-light>
+<div id="stars"></div>
 
-  <a-light
-    type="point"
-    color="#ff00ff"
-    intensity="2"
-    position="0 3 -5">
-  </a-light>
+<!-- BOTON -->
 
-  <!-- ESTRELLAS -->
-  <a-entity id="stars"></a-entity>
+<button id="hideBtn">
+  HIDE
+</button>
 
-  <!-- CAMARA USUARIO -->
-  <a-entity position="0 1.6 8">
-    <a-camera>
-      <a-cursor color="#00ffff"></a-cursor>
-    </a-camera>
-  </a-entity>
+<!-- MENSAJE -->
 
-  <!-- CAMARA GIGANTE -->
-  <a-entity
-    id="megaCamera"
-    position="0 2 -4">
-
-    <!-- CUERPO -->
-    <a-box
-      width="4"
-      height="2.5"
-      depth="2"
-      color="#111">
-    </a-box>
-
-    <!-- LENTE -->
-    <a-cylinder
-      position="0 0 1.2"
-      radius="0.9"
-      height="1"
-      rotation="90 0 0"
-      color="#222">
-    </a-cylinder>
-
-    <!-- PORTAL CON WEBCAM -->
-    <a-circle
-      id="portal"
-      position="0 0 1.75"
-      radius="0.65"
-
-      material="
-        src:#webcam;
-        shader:flat;
-        side:double"
-
-      animation="
-        property: rotation;
-        to: 0 0 360;
-        loop: true;
-        dur: 6000;
-        easing: linear"
-
-      animation__pulse="
-        property: scale;
-        dir: alternate;
-        dur: 800;
-        loop: true;
-        to: 1.1 1.1 1.1">
-    </a-circle>
-
-    <!-- GLOW -->
-    <a-ring
-      position="0 0 1.76"
-      radius-inner="0.68"
-      radius-outer="0.78"
-      color="#00ffff"
-
-      animation="
-        property: rotation;
-        to: 0 0 -360;
-        loop: true;
-        dur: 4000;
-        easing: linear">
-    </a-ring>
-
-  </a-entity>
-
-  <!-- TEXTO -->
-  <a-text
-    id="welcome"
-    value=""
-    align="center"
-    color="#00ffff"
-    width="12"
-    position="0 4 -6">
-  </a-text>
-
-</a-scene>
+<div id="message">
+  DIMENSION MODE
+</div>
 
 <script>
 
@@ -176,7 +199,7 @@
    WEBCAM
 ========================= */
 
-async function initWebcam(){
+async function startWebcam(){
 
   const video = document.getElementById("webcam");
 
@@ -190,136 +213,83 @@ async function initWebcam(){
 
     video.srcObject = stream;
 
-    await video.play();
-
-    console.log("WEBCAM OK");
-
   }catch(error){
 
-    console.error("ERROR WEBCAM", error);
+    console.error(error);
 
   }
 
 }
 
-initWebcam();
-
-/* =========================
-   REFERENCIAS
-========================= */
-
-const portal = document.querySelector("#portal");
-const sky = document.querySelector("#sky");
-const welcome = document.querySelector("#welcome");
-const megaCamera = document.querySelector("#megaCamera");
-const stars = document.querySelector("#stars");
-
-let activated = false;
+startWebcam();
 
 /* =========================
    ESTRELLAS
 ========================= */
 
-for(let i=0; i<500; i++){
+const starsContainer =
+  document.getElementById("stars");
 
-  const star = document.createElement("a-sphere");
+for(let i = 0; i < 250; i++){
 
-  const x = (Math.random() - 0.5) * 100;
-  const y = (Math.random() - 0.5) * 60;
-  const z = (Math.random() - 0.5) * 100;
+  const star =
+    document.createElement("div");
 
-  star.setAttribute(
-    "position",
-    `${x} ${y} ${z}`
-  );
+  star.classList.add("star");
 
-  star.setAttribute(
-    "radius",
-    Math.random() * 0.08
-  );
+  star.style.left =
+    Math.random() * 100 + "%";
 
-  star.setAttribute(
-    "color",
-    Math.random() > 0.5
-      ? "#00ffff"
-      : "#ff00ff"
-  );
+  star.style.top =
+    Math.random() * 100 + "%";
 
-  star.setAttribute(
-    "shader",
-    "flat"
-  );
+  star.style.animationDuration =
+    (2 + Math.random() * 5) + "s";
 
-  stars.appendChild(star);
+  star.style.opacity =
+    Math.random();
+
+  star.style.transform =
+    `scale(${Math.random() * 2})`;
+
+  starsContainer.appendChild(star);
+
 }
 
 /* =========================
-   ACTIVAR PORTAL
+   HIDE MODE
 ========================= */
 
-portal.addEventListener("click", () => {
+const btn =
+  document.getElementById("hideBtn");
 
-  if(activated) return;
+const darkness =
+  document.getElementById("darkness");
 
-  activated = true;
+const message =
+  document.getElementById("message");
 
-  /* CIELO */
+let active = false;
 
-  sky.setAttribute(
-    "animation__sky",
-    {
-      property:"color",
-      to:"#220044",
-      dur:3000
-    }
-  );
+btn.addEventListener("click", () => {
 
-  /* ESCALA PORTAL */
+  active = !active;
 
-  portal.setAttribute(
-    "animation__expand",
-    {
-      property:"scale",
-      to:"8 8 8",
-      dur:2500,
-      easing:"easeInOutQuad"
-    }
-  );
+  darkness.classList.toggle("active");
 
-  /* ROTACION */
+  starsContainer.classList.toggle("active");
 
-  megaCamera.setAttribute(
-    "animation__rotate",
-    {
-      property:"rotation",
-      to:"0 360 0",
-      dur:4000,
-      easing:"easeInOutExpo"
-    }
-  );
+  message.classList.toggle("active");
 
-  /* ACERCAR */
+  if(active){
 
-  megaCamera.setAttribute(
-    "animation__move",
-    {
-      property:"position",
-      to:"0 2 -2",
-      dur:2500,
-      easing:"easeOutElastic"
-    }
-  );
+    btn.innerText = "RETURN";
 
-  /* TEXTO */
+  }else{
 
-  setTimeout(() => {
+    btn.innerText = "HIDE";
 
-    welcome.setAttribute(
-      "value",
-      "WELCOME TO THE DIMENSION"
-    );
-
-  }, 1200);
+  }
 
 });
 
