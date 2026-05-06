@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HIDE MODE</title>
+  <title>DIMENSION MODE REALTIME</title>
 
   <style>
 
@@ -19,7 +19,9 @@
       font-family:Arial, sans-serif;
     }
 
-    /* VIDEO FONDO */
+    /* =========================
+       VIDEO FONDO
+    ========================= */
 
     #webcam{
       position:fixed;
@@ -28,35 +30,50 @@
       height:100%;
       object-fit:cover;
       z-index:1;
-      transform: scaleX(-1);
+      transform:scaleX(-1);
     }
 
-    /* CAPA OSCURA */
+    /* =========================
+       OSCURIDAD
+    ========================= */
 
     #darkness{
       position:fixed;
       inset:0;
+
       background:rgba(0,0,0,0);
+
       transition:1s;
+
       z-index:2;
+
       pointer-events:none;
-      backdrop-filter: blur(0px);
+
+      backdrop-filter:blur(0px);
     }
 
     #darkness.active{
-      background:rgba(0,0,0,0.88);
-      backdrop-filter: blur(4px);
+
+      background:rgba(0,0,0,0.90);
+
+      backdrop-filter:blur(5px);
     }
 
-    /* ESTRELLAS */
+    /* =========================
+       ESTRELLAS
+    ========================= */
 
     #stars{
       position:fixed;
       inset:0;
+
       z-index:3;
-      pointer-events:none;
+
       opacity:0;
+
       transition:1s;
+
+      pointer-events:none;
     }
 
     #stars.active{
@@ -65,14 +82,20 @@
 
     .star{
       position:absolute;
+
       width:2px;
       height:2px;
+
       background:white;
+
       border-radius:50%;
-      animation: float 4s infinite alternate;
+
+      animation:
+        float 4s infinite alternate;
     }
 
     @keyframes float{
+
       from{
         transform:translateY(0px);
         opacity:0.3;
@@ -82,34 +105,43 @@
         transform:translateY(-20px);
         opacity:1;
       }
+
     }
 
-    /* BOTON */
+    /* =========================
+       BOTON
+    ========================= */
 
     #hideBtn{
+
       position:fixed;
+
       top:30px;
       left:50%;
+
       transform:translateX(-50%);
+
       z-index:999;
 
       padding:16px 40px;
 
       border:none;
+
       border-radius:50px;
 
-      background:rgba(0,0,0,0.5);
+      background:rgba(0,0,0,0.45);
 
       color:#00ffff;
 
       font-size:20px;
+
       letter-spacing:4px;
 
       cursor:pointer;
 
-      backdrop-filter: blur(10px);
-
       transition:0.4s;
+
+      backdrop-filter:blur(10px);
 
       box-shadow:
         0 0 10px #00ffff,
@@ -127,13 +159,16 @@
         0 0 60px #00ffff;
     }
 
-    /* TEXTO */
+    /* =========================
+       MENSAJE
+    ========================= */
 
     #message{
 
       position:fixed;
 
       bottom:60px;
+
       width:100%;
 
       text-align:center;
@@ -164,7 +199,9 @@
 
 <body>
 
-<!-- WEBCAM -->
+<!-- =========================
+     WEBCAM
+========================= -->
 
 <video
   id="webcam"
@@ -173,27 +210,98 @@
   playsinline>
 </video>
 
-<!-- OSCURIDAD -->
+<!-- =========================
+     OSCURIDAD
+========================= -->
 
 <div id="darkness"></div>
 
-<!-- ESTRELLAS -->
+<!-- =========================
+     ESTRELLAS
+========================= -->
 
 <div id="stars"></div>
 
-<!-- BOTON -->
+<!-- =========================
+     BOTON
+========================= -->
 
 <button id="hideBtn">
   HIDE
 </button>
 
-<!-- MENSAJE -->
+<!-- =========================
+     TEXTO
+========================= -->
 
 <div id="message">
   DIMENSION MODE
 </div>
 
-<script>
+<!-- =========================
+     FIREBASE + APP
+========================= -->
+
+<script type="module">
+
+/* =========================
+   FIREBASE
+========================= */
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  set,
+  onValue
+}
+from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+/* =========================
+   CONFIG
+========================= */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyCynJecnB3V5E5mZkg0TkDkaCfmvkZXgAk",
+
+  authDomain:
+    "dimension-portal-bb235.firebaseapp.com",
+
+  databaseURL:
+    "https://dimension-portal-bb235-default-rtdb.firebaseio.com",
+
+  projectId:
+    "dimension-portal-bb235",
+
+  storageBucket:
+    "dimension-portal-bb235.firebasestorage.app",
+
+  messagingSenderId:
+    "892762879486",
+
+  appId:
+    "1:892762879486:web:e836a2a452233375607caf",
+
+  measurementId:
+    "G-397EX4988L"
+
+};
+
+/* =========================
+   INIT
+========================= */
+
+const app =
+  initializeApp(firebaseConfig);
+
+const db =
+  getDatabase(app);
+
+const portalRef =
+  ref(db, "portal/state");
 
 /* =========================
    WEBCAM
@@ -201,7 +309,8 @@
 
 async function startWebcam(){
 
-  const video = document.getElementById("webcam");
+  const video =
+    document.getElementById("webcam");
 
   try{
 
@@ -215,7 +324,10 @@ async function startWebcam(){
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "WEBCAM ERROR",
+      error
+    );
 
   }
 
@@ -257,7 +369,7 @@ for(let i = 0; i < 250; i++){
 }
 
 /* =========================
-   HIDE MODE
+   ELEMENTOS
 ========================= */
 
 const btn =
@@ -271,25 +383,54 @@ const message =
 
 let active = false;
 
-btn.addEventListener("click", () => {
+/* =========================
+   CLICK GLOBAL
+========================= */
+
+btn.addEventListener("click", async () => {
 
   active = !active;
 
-  darkness.classList.toggle("active");
+  await set(portalRef, {
+    active
+  });
 
-  starsContainer.classList.toggle("active");
+});
 
-  message.classList.toggle("active");
+/* =========================
+   REALTIME GLOBAL
+========================= */
 
-  if(active){
+onValue(portalRef, (snapshot) => {
 
-    btn.innerText = "RETURN";
+  const data = snapshot.val();
 
-  }else{
+  if(!data) return;
 
-    btn.innerText = "HIDE";
+  const enabled =
+    data.active;
 
-  }
+  darkness.classList.toggle(
+    "active",
+    enabled
+  );
+
+  starsContainer.classList.toggle(
+    "active",
+    enabled
+  );
+
+  message.classList.toggle(
+    "active",
+    enabled
+  );
+
+  btn.innerText =
+    enabled
+      ? "RETURN"
+      : "HIDE";
+
+  active = enabled;
 
 });
 
